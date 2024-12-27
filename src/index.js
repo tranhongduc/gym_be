@@ -8,6 +8,7 @@ const PORT = 3000;
 
 const authRoute = require("./app/routes/auth.route");
 const foodRoute = require("./app/routes/food.route");
+const recipeRoute = require("./app/routes/recipe.route");
 
 const server = http.createServer(app);
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 // auth route
 app.use("/api/auth", authRoute);
 app.use("/api/foods", foodRoute);
+app.use("/api/recipes", recipeRoute);
 
 
 server.listen(PORT, () => {

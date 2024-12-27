@@ -1,5 +1,8 @@
 const db = require("../models/index");
 const Food = db.Food;
+const Foodrecipe = db.Foodrecipe;
+const Recipe = db.Recipe;
+
 
 exports.createFood = async (req, res) => {
     try {
@@ -110,5 +113,99 @@ exports.deleteFood = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+// Lấy thực phẩm theo ID kèm theo danh sách công thức
+exports.getFoodByIdWithRecipes = async (req, res) => {
+    try {
+        const foodId = req.params.id;
+
+        // Tìm món ăn theo ID và bao gồm nguyên liệu
+        const food = await Food.findByPk(foodId, {
+            include: {
+                model: Recipe,
+                as: 'recipes', // Alias phải khớp với alias trong định nghĩa mối quan hệ
+                through: { attributes: ['quantity'] }, // Bao gồm trường `quantity` từ bảng trung gian
+            },
+        });
+
+        if (!food) {
+            return res.status(404).json({ message: "Food not found" });
+        }
+
+        return res.status(200).json({
+            message: "Food found",
+            food, // Trả về món ăn kèm nguyên liệu
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+
+// Tạo món ăn kèm theo danh sách công thức
+exports.createFoodWithRecipes = async (req, res) => {
+    try {
+        const { name, description, type, dietMode, calories, recipes, cookingTime, servingSize } = req.body;
+
+        // Kiểm tra nguyên liệu trong `recipes`
+        if (recipes && recipes.length > 0) {
+            const recipeIds = recipes.map(recipe => recipe.recipeId);
+            const existingRecipes = await Recipe.findAll({
+                where: { id: recipeIds },
+            });
+
+            if (existingRecipes.length !== recipes.length) {
+                return res.status(404).json({ message: "Some recipes not found" });
+            }
+        }
+
+        // Tạo món ăn
+        const food = await Food.create({
+            name,
+            description,
+            type,
+            dietMode,
+            calories,
+            cookingTime,
+            servingSize,
+        });
+
+        // Liên kết món ăn với nguyên liệu
+        if (recipes && recipes.length > 0) {
+            const foodRecipes = recipes.map(recipe => ({
+                foodId: food.id,
+                recipeId: recipe.recipeId,
+                quantity: recipe.quantity,
+            }));
+
+            await Foodrecipe.bulkCreate(foodRecipes);
+        }
+
+        // Lấy món ăn kèm nguyên liệu
+        const createdFood = await Food.findByPk(food.id, {
+            include: {
+                model: Recipe,
+                as: 'recipes',
+                through: { attributes: ['quantity'] },
+            },
+        });
+
+        return res.status(201).json({
+            message: "Food created successfully with recipes",
+            food: createdFood,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message,
+        });
     }
 };
