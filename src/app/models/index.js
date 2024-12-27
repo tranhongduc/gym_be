@@ -51,7 +51,13 @@ sequelize.authenticate().then(() => {
 
 db.sequelize = sequelize;
 
+
 db.users = require('./user.model')(sequelize, Sequelize);
 db.foods = require('./food.model')(sequelize, Sequelize);
+db.recipes = require('./recipe.model')(sequelize, Sequelize);
+db.Foodrecipe = require('./food_recipe.model')(sequelize, Sequelize);
+
+db.foods.belongsToMany(db.recipes, { through: db.Foodrecipe, foreignKey: 'foodId', otherKey: 'recipeId' });
+db.recipes.belongsToMany(db.foods, { through: db.Foodrecipe, foreignKey: 'recipeId', otherKey: 'foodId' });
 
 module.exports = db;

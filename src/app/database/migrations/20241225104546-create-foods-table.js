@@ -2,8 +2,8 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.createTable("foods", {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('foods', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -18,7 +18,7 @@ module.exports = {
         allowNull: true,
       },
       type: {
-        type: Sequelize.ENUM("sáng", "trưa", "tối"),
+        type: Sequelize.ENUM('Breakfast', 'Luch', 'Dinner'),
         allowNull: false,
       },
       diet_Mode: {
@@ -50,7 +50,7 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable("foods");
-  }
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('foods');
+  },
 };

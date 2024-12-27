@@ -4,7 +4,12 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class Food extends Model {
         static associate(models) {
-            // Không có quan hệ nào ở đây
+            Food.belongsToMany(models.Recipe, {
+                through: models.FoodRecipe, // Bảng trung gian
+                foreignKey: 'foodId',       // Khóa ngoại từ bảng FoodRecipe trỏ đến Food
+                otherKey: 'recipeId',       // Khóa ngoại từ bảng FoodRecipe trỏ đến Recipe
+                as: 'recipes',              // Alias cho quan hệ này
+            });    
         }
     }
 
