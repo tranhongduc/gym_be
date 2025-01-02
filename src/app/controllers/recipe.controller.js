@@ -1,6 +1,6 @@
 const db = require('../models/index');
-const Recipe = db.Recipe;  // Đổi tên biến để tránh trùng với tên model
-const Food = db.Food;
+const Recipe = db.recipes;  // Đổi tên biến để tránh trùng với tên model
+const Food = db.foods;
 const Foodrecipe = db.Foodrecipe;
 
 // Tạo nguyên liệu

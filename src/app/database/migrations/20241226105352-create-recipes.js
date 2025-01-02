@@ -5,7 +5,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('recipes', {
       id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT(20),
         autoIncrement: true,
         primaryKey: true,
       },

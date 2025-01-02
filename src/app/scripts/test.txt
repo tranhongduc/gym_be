@@ -1,0 +1,2 @@
+node src/app/scripts/seedRecipes.js
+node src/app/scripts/seedFood.js 

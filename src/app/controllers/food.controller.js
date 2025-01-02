@@ -1,7 +1,9 @@
+const { sequelize } = require("../models/index"); 
+const { Op } = require('sequelize');
 const db = require("../models/index");
-const Food = db.Food;
+const Food = db.foods;
 const Foodrecipe = db.Foodrecipe;
-const Recipe = db.Recipe;
+const Recipe = db.recipes;
 
 
 exports.createFood = async (req, res) => {
@@ -150,9 +152,82 @@ exports.getFoodByIdWithRecipes = async (req, res) => {
 
 
 // Tạo món ăn kèm theo danh sách công thức
+// exports.createFoodWithRecipes = async (req, res) => {
+//     try {
+//         const { name, description, type, dietMode, calories, recipes, cookingTime, servingSize } = req.body;
+
+//         // Kiểm tra nguyên liệu trong `recipes`
+//         if (recipes && recipes.length > 0) {
+//             const recipeIds = recipes.map(recipe => recipe.recipeId);
+//             const existingRecipes = await Recipe.findAll({
+//                 where: { id: recipeIds },
+//             });
+
+//             if (existingRecipes.length !== recipes.length) {
+//                 return res.status(404).json({ message: "Some recipes not found" });
+//             }
+//         }
+
+//         // Tạo món ăn
+//         const food = await Food.create({
+//             name,
+//             description,
+//             type,
+//             dietMode,
+//             calories,
+//             cookingTime,
+//             servingSize,
+//         });
+
+//         // Liên kết món ăn với nguyên liệu
+//         if (recipes && recipes.length > 0) {
+//             const foodRecipes = recipes.map(recipe => ({
+//                 foodId: food.id,
+//                 recipeId: recipe.recipeId,
+//                 quantity: recipe.quantity,
+//             }));
+
+//             await Foodrecipe.bulkCreate(foodRecipes);
+//         }
+
+//         // Lấy món ăn kèm nguyên liệu
+//         const createdFood = await Food.findByPk(food.id, {
+//             include: {
+//                 model: Recipe,
+//                 as: 'recipes',
+//                 through: { attributes: ['quantity'] },
+//             },
+//         });
+
+//         return res.status(201).json({
+//             message: "Food created successfully with recipes",
+//             food: createdFood,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({
+//             message: "Internal server error",
+//             error: error.message,
+//         });
+//     }
+// };
+
 exports.createFoodWithRecipes = async (req, res) => {
     try {
-        const { name, description, type, dietMode, calories, recipes, cookingTime, servingSize } = req.body;
+        const { 
+            name, 
+            description, 
+            type, 
+            dietMode, 
+            calories, 
+            recipes, 
+            cookingTime, 
+            servingSize, 
+            allergies, 
+            dietary, 
+            urlImg, 
+            urlVideo 
+        } = req.body;
 
         // Kiểm tra nguyên liệu trong `recipes`
         if (recipes && recipes.length > 0) {
@@ -175,6 +250,10 @@ exports.createFoodWithRecipes = async (req, res) => {
             calories,
             cookingTime,
             servingSize,
+            allergies,
+            dietary,
+            urlImg,
+            urlVideo
         });
 
         // Liên kết món ăn với nguyên liệu
@@ -192,7 +271,6 @@ exports.createFoodWithRecipes = async (req, res) => {
         const createdFood = await Food.findByPk(food.id, {
             include: {
                 model: Recipe,
-                as: 'recipes',
                 through: { attributes: ['quantity'] },
             },
         });
@@ -207,5 +285,110 @@ exports.createFoodWithRecipes = async (req, res) => {
             message: "Internal server error",
             error: error.message,
         });
+    }
+};
+
+
+
+
+exports.getAllFoodByType = async (req, res) => {
+    try {
+        const { type } = req.params;  // Lấy 'type' từ tham số URL
+        const foods = await Food.findAll({
+            where: {
+                type: type // Lọc thực phẩm theo 'type'
+            }
+        });
+
+        // Nếu không tìm thấy thực phẩm nào
+        if (foods.length === 0) {
+            return res.status(404).json({ message: `No foods found for type: ${type}` });
+        }
+
+        return res.status(200).json(foods); // Trả về danh sách thực phẩm
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+exports.getAllFoodByFilters = async (req, res) => {
+    try {
+        const { type, dietMode, maxCalories, minCalories, maxCookingTime, minCookingTime, allergies, dietary,  servings } = req.query;
+
+        // Xây dựng điều kiện lọc động
+        const whereConditions = {};
+
+        // Lọc theo type (nếu có)
+        if (type) {
+            const validTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];  // Các loại bữa ăn hợp lệ
+            if (!validTypes.includes(type)) {
+                return res.status(400).json({ message: `Invalid type: ${type}. Valid types are: ${validTypes.join(', ')}` });
+            }
+            whereConditions.type = type;
+        }
+
+        // Lọc theo dietMode (nếu có)
+        if (dietMode) {
+            whereConditions.dietMode = dietMode;
+        }
+        if (allergies) {
+            const validAllergies = ['Dairy', 'Nuts', 'Shellfish', 'Eggs'];  
+            if (!validAllergies.includes(allergies)) {
+                return res.status(400).json({ message: `Invalid type: ${allergies}. Valid types are: ${validAllergies.join(', ')}` });
+            }
+            whereConditions.allergies = allergies;
+        }
+        if (dietary) {
+            const validDietary = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Keto', 'Paleo'];  
+            if (!validDietary.includes(dietary)) {
+                return res.status(400).json({ message: `Invalid type: ${dietary}. Valid types are: ${validDietary.join(', ')}` });
+            }
+            whereConditions.dietary = dietary;
+        }
+
+
+        // Lọc theo calories (nếu có)
+        if (minCalories || maxCalories) {
+            whereConditions.calories = {};
+            if (minCalories) whereConditions.calories[Op.gte] = minCalories;
+            if (maxCalories) whereConditions.calories[Op.lte] = maxCalories;
+        }
+
+        // Lọc theo cookingTime (nếu có)
+        if (minCookingTime || maxCookingTime) {
+            whereConditions.cookingTime = {};
+            if (minCookingTime) whereConditions.cookingTime[Op.gte] = minCookingTime;
+            if (maxCookingTime) whereConditions.cookingTime[Op.lte] = maxCookingTime;
+        }
+
+        if (type) {
+            const validTypes = ['Dairy', 'Nuts', 'Shellfish', 'Eggs'];  // Các loại bữa ăn hợp lệ
+            if (!validTypes.includes(type)) {
+                return res.status(400).json({ message: `Invalid type: ${type}. Valid types are: ${validTypes.join(', ')}` });
+            }
+            whereConditions.type = type;
+        }
+
+        // Lọc theo servingSize (nếu có)
+        if (servings) {
+            whereConditions.servingSize = servings;
+        }
+
+        // Lấy danh sách thực phẩm với điều kiện lọc
+        const foods = await Food.findAll({
+            where: whereConditions
+        });
+
+        // Nếu không tìm thấy thực phẩm nào
+        if (foods.length === 0) {
+            return res.status(404).json({ message: 'No foods found for the given filters' });
+        }
+
+        return res.status(200).json(foods); // Trả về danh sách thực phẩm
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };

@@ -14,6 +14,9 @@ const signupSchema = Joi.object({
     sex: Joi.string().valid('male', 'female', 'other').required(),
     weight: Joi.number().optional(),
     height: Joi.number().optional(),
+    avatar: Joi.string().optional(),
+    activityLevel: Joi.string().valid('low', 'moderate', 'high').optional(),
+    goal: Joi.string().valid('weight_loss', 'maintenance', 'muscle_gain').optional(),
 });
 
 exports.validateSignup = validator(signupSchema);

@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            
+            User.hasMany(models.Favorite, {
+                foreignKey: 'userId',
+                as: 'favorites',
+              });
         }
     }
 
@@ -65,7 +68,19 @@ module.exports = (sequelize, DataTypes) => {
         },
         avatar: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: true,
+        },
+        activityLevel: {
+            type: DataTypes.ENUM('low', 'moderate', 'high'),
+            allowNull: true,
+        },
+        goal: {
+            type: DataTypes.ENUM('weight_loss', 'maintenance', 'muscle_gain'),
+            allowNull: true,
+        },
+        bmi: {
+            type: DataTypes.FLOAT,
+            allowNull: true,            
         },
         status: {
             type: DataTypes.INTEGER,
@@ -81,6 +96,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+
     }, {
         sequelize,
         modelName: 'users',

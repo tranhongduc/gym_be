@@ -9,7 +9,12 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'foodId',       // Khóa ngoại từ bảng FoodRecipe trỏ đến Food
                 otherKey: 'recipeId',       // Khóa ngoại từ bảng FoodRecipe trỏ đến Recipe
                 as: 'recipes',              // Alias cho quan hệ này
-            });    
+            }); 
+            
+            Food.hasMany(models.Favorite, {
+                foreignKey: 'foodId',
+                as: 'favorites',
+              });
         }
     }
 
@@ -23,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true, // Có thể không có mô tả
         },
         type: {
+            type: DataTypes.STRING,
+            allowNull: true, // Loại món ăn (chế độ ăn, món chính, v.v.)
+        },
+        allergies: {
+            type: DataTypes.STRING,
+            allowNull: true, // Loại món ăn (chế độ ăn, món chính, v.v.)
+        },
+        dietary: {
             type: DataTypes.STRING,
             allowNull: true, // Loại món ăn (chế độ ăn, món chính, v.v.)
         },
@@ -41,6 +54,14 @@ module.exports = (sequelize, DataTypes) => {
         servingSize: {
             type: DataTypes.INTEGER,
             allowNull: true, // Kích thước phần ăn
+        },
+        urlImg: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        urlVideo: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
     }, {
         sequelize,

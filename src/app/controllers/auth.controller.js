@@ -1,15 +1,70 @@
 const db = require("../models/index");
-const bycript = require("bcrypt");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const randToken = require("rand-token");
 const jwtConfig = require("../configs/jwt.config");
 const promisify = require("util").promisify;
 const User = db.users;
 const AuthService = require("../services/authService/auth.service");
+const { error } = require("console");
+
+// exports.register = async (req, res) => {
+//     try {
+        
+//         const {
+//             email,
+//             password,
+//             repeatPassword,
+//             name,
+//             dob,
+//             phoneNumber,
+//             sex,
+//             weight,
+//             height,
+//             avatar,
+//         } = req.body;
+
+//         const user = await User.findOne({ where: { email: email } });
+//         if (user) {
+//             return res.status(400).json({ message: "Email already exists" });
+//         }
+
+//         if (password !== repeatPassword) {
+//             return res.status(400).json({
+//                 message: "Password and repeat password are not the same",
+//             });
+//         }
+
+//         const hashedPassword = await bcrypt.hashSync(password, 10);
+//         let status = "active";
+//         let role = "user";
+
+//         const newUser = await User.create({
+//             role: role,
+//             email: email,
+//             password: hashedPassword,
+//             name: name,
+//             dob: dob,
+//             phoneNumber: phoneNumber,
+//             sex: sex,
+//             weight: weight || null,
+//             height: height || null,
+//             avatar: avatar || null,
+//             status: status,
+//         });
+
+//         const userWithoutPassword = newUser.toJSON();
+//         delete userWithoutPassword.password;
+
+//         return res.status(201).json(userWithoutPassword);
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({ message: "Internal server error" });
+//     }
+// };
 
 exports.register = async (req, res) => {
     try {
-        
         const {
             email,
             password,
@@ -21,24 +76,41 @@ exports.register = async (req, res) => {
             weight,
             height,
             avatar,
+            activityLevel,
+            goal,
         } = req.body;
 
+        
+
+        // Kiểm tra email đã tồn tại chưa
         const user = await User.findOne({ where: { email: email } });
         if (user) {
             return res.status(400).json({ message: "Email already exists" });
         }
 
+        // Kiểm tra mật khẩu có khớp không
         if (password !== repeatPassword) {
             return res.status(400).json({
                 message: "Password and repeat password are not the same",
             });
         }
 
-        const hashedPassword = await bycript.hashSync(password, 10);
+        // Mã hóa mật khẩu
+        const hashedPassword = await bcrypt.hash(password, 10); // Ensure bcrypt is imported
+
+        // Tính toán BMI nếu có đủ thông tin trọng lượng và chiều cao
+        let bmi = null;
+        if (weight && height) {
+            const heightInMeters = height / 100;  // Chuyển chiều cao từ cm sang mét
+            bmi = weight / (heightInMeters * heightInMeters);
+            bmi = parseFloat(bmi.toFixed(2));  // Làm tròn BMI đến 2 chữ số thập phân
+        }
+
         let status = "active";
         let role = "user";
 
-        const newUser = await User.create({
+        // Tạo người dùng mới
+        const newUser  = await User.create({
             role: role,
             email: email,
             password: hashedPassword,
@@ -48,19 +120,25 @@ exports.register = async (req, res) => {
             sex: sex,
             weight: weight || null,
             height: height || null,
-            avatar: avatar || null,
+            avatar: avatar || null, // Ensure avatar is allowed in the model
             status: status,
+            activityLevel: activityLevel || null,
+            goal: goal || null,
+            bmi: bmi || null,  // Lưu giá trị BMI vào cơ sở dữ liệu
         });
 
-        const userWithoutPassword = newUser.toJSON();
+        // Xóa mật khẩu khỏi dữ liệu trả về
+        const userWithoutPassword = newUser .toJSON();
         delete userWithoutPassword.password;
 
         return res.status(201).json(userWithoutPassword);
     } catch (error) {
-        console.log(error);
+        console.error(error); // Log the error for debugging
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
 
 exports.login = async (req, res) => {
     try {
@@ -74,7 +152,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const isPasswordValid = await bycript.compareSync(
+        const isPasswordValid = await bcrypt.compareSync(
             password,
             user.password
         );
@@ -98,7 +176,7 @@ exports.login = async (req, res) => {
             accessTokenLife
         );
         if (!accessToken) {
-            return res.status(401).json({ message: "Login failed" });
+            return res.status(401).json({ message: "Login failed" }, error.message);
         }
 
         let refreshToken = randToken.generate(jwtConfig.refreshTokenSize);
@@ -233,3 +311,5 @@ exports.checkDatabaseConnection = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database connection failed', error: error.message });
     }
   };
+
+  

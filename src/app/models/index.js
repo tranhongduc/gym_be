@@ -56,8 +56,18 @@ db.users = require('./user.model')(sequelize, Sequelize);
 db.foods = require('./food.model')(sequelize, Sequelize);
 db.recipes = require('./recipe.model')(sequelize, Sequelize);
 db.Foodrecipe = require('./food_recipe.model')(sequelize, Sequelize);
+db.exercises = require('./exercise.model')(sequelize, Sequelize);
+db.favorite = require('./favorites.model')(sequelize, Sequelize);
+db.rounds = require('./round.model')(sequelize, Sequelize);
+db.smallExercises = require('./small_exercise.model')(sequelize, Sequelize);
 
-db.foods.belongsToMany(db.recipes, { through: db.Foodrecipe, foreignKey: 'foodId', otherKey: 'recipeId' });
-db.recipes.belongsToMany(db.foods, { through: db.Foodrecipe, foreignKey: 'recipeId', otherKey: 'foodId' });
+db.foods.belongsToMany(db.recipes, {through: db.Foodrecipe, foreignKey: 'foodId', otherKey: 'recipeId', as: 'recipes'});
+db.recipes.belongsToMany(db.foods, {through: db.Foodrecipe, foreignKey: 'recipeId', otherKey: 'foodId', as: 'foods' });
+
+db.exercises.hasMany(db.rounds, { foreignKey: 'exerciseId', as: 'rounds' });
+db.rounds.belongsTo(db.exercises, { foreignKey: 'exerciseId', as: 'exercise' });
+db.rounds.hasMany(db.smallExercises, { foreignKey: 'roundId', as: 'smallExercises' });
+db.smallExercises.belongsTo(db.rounds, { foreignKey: 'roundId', as: 'round' });
+
 
 module.exports = db;

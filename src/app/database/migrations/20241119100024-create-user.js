@@ -3,54 +3,94 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('foods', {
+    await queryInterface.createTable('users', {
       id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT(20),
+        allowNull: false,
         autoIncrement: true,
         primaryKey: true,
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      type: {
-        type: Sequelize.ENUM('sáng', 'trưa', 'tối'),
-        allowNull: false,
-      },
-      diet_mode: {  // Sửa thành diet_mode
+      phone_number: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      calories: {
-        type: Sequelize.INTEGER,
+      dob: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      sex: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
-      cooking_time: {  // Sửa thành cooking_time
+      weight: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      height: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      activity_level: {
+        type: Sequelize.ENUM('low', 'moderate', 'high'),
+        allowNull: true,
+      },
+      goal: {
+        type: Sequelize.ENUM('weight_loss', 'maintenance', 'muscle_gain'),
+        allowNull: true,
+      },
+      bmi: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      avatar: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      status: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 1,
       },
-      serving_size: {  // Sửa thành serving_size
-        type: Sequelize.INTEGER,
+      role: {
+        type: Sequelize.STRING,
         allowNull: false,
+        defaultValue: 'user',
       },
-      created_at: {  // Sửa thành created_at
+      refresh_token: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      created_at: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW, // Đặt giá trị mặc định là thời gian hiện tại
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
-      updated_at: {  // Sửa thành updated_at
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW, // Đặt giá trị mặc định là thời gian hiện tại
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+      },
+      deleted_at: {
+        type: Sequelize.DATE,
+        allowNull: true,
       },
     });
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('foods');
+    await queryInterface.dropTable('users');
   }
 };
