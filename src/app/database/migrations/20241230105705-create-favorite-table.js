@@ -32,7 +32,7 @@ module.exports = {
         type: Sequelize.BIGINT(20),
         allowNull: true,
         references: {
-          model: 'Foods', // Tên bảng liên kết
+          model: 'foods', // Tên bảng liên kết
           key: 'id',
         },
         onDelete: 'SET NULL', // Nếu xóa món ăn, foodId sẽ được đặt là null

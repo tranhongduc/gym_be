@@ -6,52 +6,52 @@ const cloudinary = require('../configs/cloudinary.config'); // Import Cloudinary
 const { faker } = require('@faker-js/faker'); // Sử dụng faker-js để tạo dữ liệu ngẫu nhiên
 
 
-// Folder Cloudinary chứa ảnh và video cho bài tập và bài tập nhỏ
-const exerciseImageFolder = 'workouts/pic';  // Folder ảnh cho bài tập
-const exerciseVideoFolder = 'workouts/vi';  // Folder video cho bài tập
-const smallExerciseImageFolder = 'small_exercises/pic'; // Folder ảnh cho bài tập nhỏ
-const smallExerciseVideoFolder = 'small_exercises/vi'; // Folder video cho bài tập nhỏ
+// // Folder Cloudinary chứa ảnh và video cho bài tập và bài tập nhỏ
+// const exerciseImageFolder = 'workouts/pic';  // Folder ảnh cho bài tập
+// const exerciseVideoFolder = 'workouts/vi';  // Folder video cho bài tập
+// const smallExerciseImageFolder = 'small_exercises/pic'; // Folder ảnh cho bài tập nhỏ
+// const smallExerciseVideoFolder = 'small_exercises/vi'; // Folder video cho bài tập nhỏ
 
-// Hàm lấy ảnh ngẫu nhiên từ folder
-const getRandomImageUrl = async (folder) => {
-  try {
-    const result = await cloudinary.api.resources({
-      type: 'upload',
-      prefix: folder, // Lọc theo folder ảnh
-      max_results: 100, // Số lượng tệp tối đa lấy
-    });
+// // Hàm lấy ảnh ngẫu nhiên từ folder
+// const getRandomImageUrl = async (folder) => {
+//   try {
+//     const result = await cloudinary.api.resources({
+//       type: 'upload',
+//       prefix: folder, // Lọc theo folder ảnh
+//       max_results: 100, // Số lượng tệp tối đa lấy
+//     });
 
-    const images = result.resources;
-    if (images.length === 0) return null;
+//     const images = result.resources;
+//     if (images.length === 0) return null;
 
-    const randomImage = faker.helpers.arrayElement(images);
-    return randomImage.secure_url; // Trả về URL của ảnh ngẫu nhiên
-  } catch (error) {
-    console.error("Error getting image from Cloudinary:", error);
-    return null;
-  }
-};
+//     const randomImage = faker.helpers.arrayElement(images);
+//     return randomImage.secure_url; // Trả về URL của ảnh ngẫu nhiên
+//   } catch (error) {
+//     console.error("Error getting image from Cloudinary:", error);
+//     return null;
+//   }
+// };
 
-// Hàm lấy video ngẫu nhiên từ folder
-const getRandomVideoUrl = async (folder) => {
-    try {
-      const result = await cloudinary.api.resources({
-        type: 'upload',
-        prefix: folder, // Lọc theo folder video
-        resource_type: 'video', // Chỉ lấy video
-        max_results: 100, // Số lượng tệp tối đa lấy
-      });
+// // Hàm lấy video ngẫu nhiên từ folder
+// const getRandomVideoUrl = async (folder) => {
+//     try {
+//       const result = await cloudinary.api.resources({
+//         type: 'upload',
+//         prefix: folder, // Lọc theo folder video
+//         resource_type: 'video', // Chỉ lấy video
+//         max_results: 100, // Số lượng tệp tối đa lấy
+//       });
   
-      const videos = result.resources;
-      if (videos.length === 0) return null;
+//       const videos = result.resources;
+//       if (videos.length === 0) return null;
   
-      const randomVideo = faker.helpers.arrayElement(videos);
-      return randomVideo.secure_url; // Trả về URL của video ngẫu nhiên
-    } catch (error) {
-      console.error("Error getting video from Cloudinary:", error);
-      return null;
-    }
-  };
+//       const randomVideo = faker.helpers.arrayElement(videos);
+//       return randomVideo.secure_url; // Trả về URL của video ngẫu nhiên
+//     } catch (error) {
+//       console.error("Error getting video from Cloudinary:", error);
+//       return null;
+//     }
+//   };
 
 //Chú ý rằng dùng để khi hết dữ liệu trong lần gọi trên admin api bị giới hạn 1 h nên gọi để mảng dữ liệu trước
   // Tạo 4 mảng dữ liệu để lưu trữ ảnh và video
@@ -114,8 +114,8 @@ const seedExercise = async () => {
       const roundsCount =faker.number.int({ min: 1, max: 5 }); // Số vòng tập ngẫu nhiên từ 1 đến 5
 
 
-      const urlImg = await getRandomImageUrl(exerciseImageFolder); // Lấy ảnh ngẫu nhiên từ folder workout
-      const urlVideo = await getRandomVideoUrl(exerciseVideoFolder); // Lấy video ngẫu nhiên từ folder workout
+      const urlImg =  faker.helpers.arrayElement(exerciseImages); // Lấy ảnh ngẫu nhiên từ folder workout
+      const urlVideo = faker.helpers.arrayElement(exerciseVideos); // Lấy video ngẫu nhiên từ folder workout
 
       // Tạo bài tập mới
       const exercise = await Exercise.create({
@@ -185,10 +185,10 @@ const seedExercise = async () => {
   }
 };
 
-seedExercise();
+// seedExercise();
 
-// // Chạy preload và seed
-// (async () => {
-//   await preloadMediaData();
-//   await seedExercise();
-// })();
+// Chạy preload và seed
+(async () => {
+  await preloadMediaData();
+  await seedExercise();
+})();

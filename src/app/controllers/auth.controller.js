@@ -106,7 +106,7 @@ exports.register = async (req, res) => {
             bmi = parseFloat(bmi.toFixed(2));  // Làm tròn BMI đến 2 chữ số thập phân
         }
 
-        let status = "active";
+        let status = 1;
         let role = "user";
 
         // Tạo người dùng mới
