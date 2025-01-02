@@ -14,7 +14,7 @@ module.exports = {
         type: Sequelize.BIGINT(20),
         allowNull: false,
         references: {
-          model: 'Users', // Bảng Users
+          model: 'users', // Bảng Users
           key: 'id',
         },
         onDelete: 'CASCADE', // Khi xóa user, favorites cũng sẽ bị xóa
@@ -23,7 +23,7 @@ module.exports = {
         type: Sequelize.BIGINT(20),
         allowNull: true,
         references: {
-          model: 'Exercises', // Tên bảng liên kết
+          model: 'exercises', // Tên bảng liên kết
           key: 'id',
         },
         onDelete: 'SET NULL', // Nếu xóa bài tập, exerciseId sẽ được đặt là null
